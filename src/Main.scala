@@ -1,3 +1,5 @@
+import scala.collection.mutable.ListBuffer
+
 /**
  * Created by lzj on 15-10-4.
  */
@@ -94,21 +96,146 @@ object Scala99{
   }
 
   // P07: Flatten a nested list structure.
+
+  //注意参数
   def flatten(xs: Any): List[Any] = xs match {
     case Nil => Nil
     case q => List(q)
     case h :: tail => flatten(h) ::: flatten(tail)
   }
 
+  // error
+/*  def flatten2(xs: List[Any]) : List[Any] = xs match {
+    case Nil => Nil
+    case p => List(p)
+    case h :: tail => flatten2(List(h)) ::: flatten2(tail)
+  }*/
+
+  // P08: Eliminate consecutive duplicates of list elements.
+  //scala> compress(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
+  //res0: List[Symbol] = List('a, 'b, 'c, 'a, 'd, 'e)
+
+  def compress(xs: List[Char]): List[Char] = xs match {
+    case Nil => Nil
+    case p :: Nil  => List(p)
+    case f :: s :: tail =>
+      if(f == s)
+        compress(s :: tail)
+      else
+        f :: compress(s :: tail)
+  }
+
+  // P09: Pack consecutive duplicates of list elements into sublists.
+  /* scala> pack(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
+  res0: List[List[Symbol]] = List(List('a, 'a, 'a, 'a), List('b), List('c, 'c),
+    List('a, 'a), List('d), List('e, 'e, 'e, 'e))
+  */
+  def pack[T](list: List[T]) : List[List[T]] = list match {
+    case Nil => Nil
+    case head :: Nil => List(List(head))
+    case a :: b :: xs if a != b =>
+      List(List(a)) ::: pack(b :: xs)
+    case a :: b :: xs =>
+      pack(xs) match {
+        case Nil => List(List(a,b))
+        case restList :: restXs if (restList.head == a) =>
+          List(List(a,b) ::: restList) ::: restXs
+        case rest => List(List(a,b)) ::: rest
+      }
+  }
+
+  def pack2(xs: List[Int]): List[List[Int]] = xs match {
+    case Nil => Nil
+    case a :: Nil => (List(List(a)))
+    case a :: b :: tail if a != b => List(List(a)) ::: pack2(b::tail)
+    case a :: b :: tail  => pack2(tail) match {
+      case c :: d if(c.head == a) =>
+        List(a :: b :: c) ::: d
+      case r => List(List(a,b)) ::: r
+
+    }
+  }
+
+  // P10: Run-length encoding of a list.
+  /*scala> encode(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
+  res0: List[(Int, Symbol)] = List((4,'a), (1,'b), (2,'c), (2,'a), (1,'d), (4,'e))*/
+  def encode(xs: List[Int]): List[Any] = {
+    var res = List[Any]()
+    def loop(xs: List[Int]){
+      var pre = xs(0)
+      var ct = 0
+      for(i <- xs){
+        if(i == pre){
+          ct += 1
+        }else{
+          res = res ::: List(List(ct,pre))
+          pre = i
+          ct = 1
+        }
+      }
+    }
+
+    loop(xs)
+    res
+  }
+
+  def encode2(xs: List[Int]): List[Any] = {
+    def recur(xs: List[Int],n: Int): List[Any] = xs match {
+      case Nil => Nil
+      case h :: Nil => List(List(n+1,h))
+      case a :: b :: tail if a == b => recur(b :: tail,n+1)
+      case a :: b :: tail if a != b => recur(List(a),n) ::: recur(b :: tail,0)
+    }
+    recur(xs,0)
+  }
+
+  // P11: Modified run-length encoding.
+  /*scala> encodeModified(List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e))
+  res0: List[Any] = List((4,'a), 'b, (2,'c), (2,'a), 'd, (4,'e))
+  */
+  def encodeModified(xs: List[Int]): List[Any] = {
+    def recur(xs: List[Int],n: Int): List[Any] = xs match {
+      case Nil => Nil
+      case h :: Nil if n == 0 => List(h)
+      case h :: Nil => List(List(n+1,h))
+      case a :: b :: tail if a == b => recur(b :: tail,n+1)
+      case a :: b :: tail if a != b => recur(List(a),n) ::: recur(b :: tail,0)
+    }
+    recur(xs,0)
+  }
+
+  //P12: Decode a run-length encoded list.
+  /*scala> decode(List((4, 'a), (1, 'b), (2, 'c), (2, 'a), (1, 'd), (4, 'e)))
+  res0: List[Symbol] = List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e)*/
+
+  def decode[T](xs: List[(Int,T)]): List[T] = {
+    xs flatMap { tuple =>
+      var (a,b) = tuple
+      (1 to a).map(_ => b)
+    }
+  }
+
+  def decode2[T](xs: List[(Int,T)]): List[T] = {
+    var c = for((a,b) <- xs) yield(1 to a map  (_ => b) )
+    c.flatMap(a => a)
+  }
+
+  // P13: Run-length encoding of a list (direct solution).
+  /*scala> decode(List((4, 'a), (1, 'b), (2, 'c), (2, 'a), (1, 'd), (4, 'e)))
+  res0: List[Symbol] = List('a, 'a, 'a, 'a, 'b, 'c, 'c, 'a, 'a, 'd, 'e, 'e, 'e, 'e)*/
+
+  // P14: Duplicate the elements of a list.
+  /*scala> duplicate(List('a, 'b, 'c, 'c, 'd))
+  res0: List[Symbol] = List('a, 'a, 'b, 'b, 'c, 'c, 'c, 'c, 'd, 'd)*/
+
+  def duplicate[T](xs: List[T]): List[T] = xs flatMap(i => List(i,i))
+
 }
 
 
 
 object Main {
-  def main(args: Array[String]) {
-    println(Scala99.kth(1,List(1,2,3)))
-    println(Scala99.kth(2,List(1,2,3)))
-    println(Scala99.kth(-1,List(1,2,3)))
-    println(Scala99.kth(5,List(1,2,3)))
+  def main(args: Array[String]): Unit = {
+    println(Scala99.decode2(List((2,"c"),(1,"a"))))
   }
 }
