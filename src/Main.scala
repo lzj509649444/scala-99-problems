@@ -97,11 +97,12 @@ object Scala99{
 
   // P07: Flatten a nested list structure.
 
-  //注意参数
+  //注意参数,case顺序
   def flatten(xs: Any): List[Any] = xs match {
     case Nil => Nil
-    case q => List(q)
     case h :: tail => flatten(h) ::: flatten(tail)
+    case q => List(q)
+
   }
 
   // error
@@ -230,12 +231,23 @@ object Scala99{
 
   def duplicate[T](xs: List[T]): List[T] = xs flatMap(i => List(i,i))
 
+  // P16: Drop every Nth element from a list.
+  def dropn(xs: List[Int],k: Int): List[Int] = {
+    def recur(xs: List[Int],n: Int): List[Int] = xs match {
+      case Nil => Nil
+      case a :: b =>
+        var r = recur(b,n+1)
+        if(n%k == 0) r else a :: r
+    }
+    recur(xs,1)
+  }
+
 }
 
 
 
 object Main {
   def main(args: Array[String]): Unit = {
-    println(Scala99.decode2(List((2,"c"),(1,"a"))))
+    println(Scala99.flatten(List(1,2,List(1,2,List(3,4)))))
   }
 }
