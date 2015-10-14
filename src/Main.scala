@@ -242,12 +242,92 @@ object Scala99{
     recur(xs,1)
   }
 
+  // P17: Split a list into two parts.
+  /*scala> split(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+  res0: (List[Symbol], List[Symbol]) = (List('a, 'b, 'c),List('d, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+  */
+  def splitn(n: Int,xs: List[Int]): List[Any] = {
+    xs match {
+      case Nil => Nil
+      case a :: Nil => List(a)
+      case a :: b if n == 1 => List(List(a)) ::: List(b)
+      case a :: b =>
+        var r = splitn(n - 1, b)
+        r.head match {
+          case p :: q => List(a :: p :: q) ::: r.tail
+          case p => a :: r
+        }
+    }
+  }
+
+  def group(n: Int,xs: List[Int]): List[List[Int]] = {
+    def recur(x: Int,s: List[Int]): List[List[Int]] = s match{
+      case Nil => Nil
+      case a::Nil => List(List(a))
+      case a::b if x == 1 =>
+        var r = recur(n,b)
+        if(r.isEmpty)return List(List(a))
+        List(List(a)) ::: r
+      case a::b =>
+        var r = recur(x-1,b)
+        r match{
+          case c::Nil => List(a::c)
+          case c::d   => List(a::c) ::: d
+        }
+    }
+    recur(n,xs)
+
+  }
+
+  // P18: Extract a slice from a list.
+  /*scala> slice(3, 7, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+  res0: List[Symbol] = List('d, 'e, 'f, 'g)*/
+
+  def slice(b: Int,e: Int, xs: List[Int]): List[Int] = {
+    for((i,index) <- xs.zipWithIndex if index >= b && index <= e) yield i
+  }
+
+  // P19: Rotate a list N places to the left.
+  /*scala> rotate(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+  res0: List[Symbol] = List('d, 'e, 'f, 'g, 'h, 'i, 'j, 'k, 'a, 'b, 'c)
+  cala> rotate(-2, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+  res1: List[Symbol] = List('j, 'k, 'a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i)*/
+  def rotate(n:Int, xs:List[Int]): List[Int] = {
+    var xxs = xs.zipWithIndex
+    var a:List[Int] = for((i,index)<-xxs if index < n)yield i
+    var b:List[Int] = for((i,index)<-xxs if index >= n)yield i
+    b ::: a
+  }
+
+  // P20: Remove the Kth element from a list
+  /*scala> removeAt(1, List('a, 'b, 'c, 'd))
+  res0: (List[Symbol], Symbol) = (List('a, 'c, 'd),'b)*/
+  def removeAt(n:Int,xs:List[Int]): List[Int] = {
+    for((i,index) <- xs.zipWithIndex if index != n) yield i
+  }
+
+  // P21: Insert an element at a given position into a list.
+  def insertAt(n:Int,e:Int, xs:List[Int]):List[Int] = {
+    var xxs = xs.zipWithIndex
+    var a:List[Int] = for((i,index)<-xxs if index < n)yield i
+    var b:List[Int] = for((i,index)<-xxs if index >= n)yield i
+    a ::: List(e) ::: b
+  }
+
+  // P22: Create a list containing all integers within a given range.
+  /*scala> range(4, 9)
+  res0: List[Int] = List(4, 5, 6, 7, 8, 9)*/
+  def range(b:Int,e:Int):List[Int] = {
+    var c = b to e map {i=>i}
+    c.to[List]
+  }
+
 }
 
 
 
 object Main {
   def main(args: Array[String]): Unit = {
-    println(Scala99.flatten(List(1,2,List(1,2,List(3,4)))))
+    println(Scala99.range(3,5))
   }
 }
