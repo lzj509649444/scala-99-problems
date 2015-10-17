@@ -322,12 +322,74 @@ object Scala99{
     c.to[List]
   }
 
+  //P23: Extract a given number of randomly selected elements from a list.
+  def randSelect(p:Int,xs:List[Int]):List[Int] = {
+    var c = 1  to p map { _ => (Math.random() * xs.length).toInt }
+    c.to[List]
+  }
+
+  // P25: Generate a random permutation of the elements of a list.
+  //def randomPermutaion
+
+  // P26: Generate the combinations of K distinct objects chosen from the N elements of a list.
+  /*scala> combinations(3, List('a, 'b, 'c, 'd, 'e, 'f))
+  res0: List[List[Symbol]] = List(List('a, 'b, 'c), List('a, 'b, 'd), List('a, 'b, 'e), ...*/
+  // (C(N,K),选和不选
+  def combination(n:Int,xs:List[Int]):List[List[Int]] = {
+    xs match {
+      case Nil => Nil
+      case head::tail =>
+        if (n <=0 || n > xs.length){
+          Nil
+        }else if (n == 1){
+          xs.map(List(_))
+        }else{
+          combination(n-1,tail).map(head::_) ::: combination(n,tail)
+        }
+    }
+  }
+
+  // P27: Group the elements of a set into disjoint subsets.
+
+  /*scala> group(List(2,3,4), List('a,'b,'c,'d,'e,'f,'g,'h,'i).length
+    res162: Int = 1260
+
+  scala> group(List(2,3,4), List('a,'b,'c,'d,'e,'f,'g,'h,'i).foreach(println)
+    List(List('a, 'b), List('c, 'd, 'e), List('f, 'g, 'h, 'i))
+    List(List('a, 'b), List('c, 'd, 'f), List('e, 'g, 'h, 'i))
+    List(List('a, 'b), List('c, 'd, 'g), List('e, 'f, 'h, 'i))
+    List(List('a, 'b), List('c, 'd, 'h), List('e, 'f, 'g, 'i))
+    List(List('a, 'b), List('c, 'd, 'i), List('e, 'f, 'g, 'h))
+    ...
+  List(List('h, 'i), List('c, 'f, 'g), List('a, 'b, 'd, 'e))
+  List(List('h, 'i), List('d, 'e, 'f), List('a, 'b, 'c, 'g))
+  List(List('h, 'i), List('d, 'e, 'g), List('a, 'b, 'c, 'f))
+  List(List('h, 'i), List('d, 'f, 'g), List('a, 'b, 'c, 'e))
+  List(List('h, 'i), List('e, 'f, 'g), List('a, 'b, 'c, 'd))
+*/
+
+  def groupCom(xs:List[Int],xxs:List[Int]) : List[List[List[Int]]] = {
+    xs match {
+      case Nil => Nil
+      case head :: Nil =>
+        combination(head,xxs).map(List(_))
+      case head :: tail =>
+        var r = groupCom(tail,xxs)
+        r.flatMap { i =>
+          var in = i.flatMap(i => i)
+          var d = xxs diff in
+          combination(head,d).map{ c => c :: i}
+        }
+    }
+  }
 }
 
 
 
 object Main {
   def main(args: Array[String]): Unit = {
-    println(Scala99.range(3,5))
+    //println(Scala99.combination(2,List(1,2,3)))
+    //println(Scala99.groupCom(List(1,2),List(1,2,3)))
+    Scala99.groupCom(List(1,2,1),List(1,2,3,4)).foreach(println)
   }
 }
