@@ -1,4 +1,4 @@
-import scala.collection.mutable.ListBuffer
+
 
 /**
  * Created by lzj on 15-10-4.
@@ -382,14 +382,51 @@ object Scala99{
         }
     }
   }
+
+  // P28: Sorting a list of lists according to length of sublists.
+  def lsort(xs:List[List[Int]]):List[List[Int]] = {
+    xs.sortBy(i=> i.length)
+  }
+
+  // P31: Determine whether a given integer number is prime.
+  /*scala> 7.isPrime
+  res0: Boolean = true
+  */
+  implicit def intToNumWrapper(i: Int) : S99Int = new S99Int(i)
+  class S99Int(val i: Int) {
+    def isPrime : Boolean = {
+      if (i <= 1)
+        false
+      else if (i == 2)
+        true
+      else
+        !(2 to (i-1)).exists(x => i % x == 0)
+    }
+  }
+
+
 }
 
 
 
 object Main {
   def main(args: Array[String]): Unit = {
-    //println(Scala99.combination(2,List(1,2,3)))
+
+    implicit def intToNumWrapper(i: Int) : S99Int = new S99Int(i)
+    class S99Int(val i: Int) {
+      def isPrime : Boolean = {
+        if (i <= 1)
+          false
+        else if (i == 2)
+          true
+        else
+          !(2 to (i-1)).exists(x => i % x == 0)
+      }
+    }
+    println(7.isPrime)
+    println(7)
+    //println(Scala99.)
     //println(Scala99.groupCom(List(1,2),List(1,2,3)))
-    Scala99.groupCom(List(1,2,1),List(1,2,3,4)).foreach(println)
+    //Scala99.groupCom(List(1,2,1),List(1,2,3,4)).foreach(println)
   }
 }
